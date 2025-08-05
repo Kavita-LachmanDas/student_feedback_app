@@ -4,10 +4,11 @@ import {  createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Home from './components/Home'
 import ResetPassword from './components/ResetPassword.jsx'
 import UpdateProfile from './components/Profile.jsx'
-import Feedback from './components/Feedback.jsx'
+// import Feedback from './components/Feedback.jsx'
 import PublicRoute from './components/PublicRoute.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import GetAllUsers from './components/getallusers.jsx'
+import Feedback from './components/Feedback.jsx'
 
 const App = () => {
   const router = createBrowserRouter([
