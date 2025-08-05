@@ -6,8 +6,9 @@ import ResetPassword from './components/ResetPassword.jsx'
 import UpdateProfile from './components/Profile.jsx'
 import PublicRoute from './components/PublicRoute.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
-import GetAllUsers from './components/getallusers.jsx'
+
 import Feedback from './components/Feedback.jsx'
+import GetAllUsers from './components/GetAllUsers.jsx'
 
 const App = () => {
   const router = createBrowserRouter([
