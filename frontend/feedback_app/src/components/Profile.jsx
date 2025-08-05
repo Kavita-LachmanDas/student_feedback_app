@@ -50,29 +50,32 @@ import axios from "axios";
 import { getToken } from "../utils/auth";
 
 const Profile = () => {
-  const [user, setUser] = useState({
-    name: "",
-    email: "",
-    contact: "",
-    image: "",
-  });
+const [user, setUser] = useState({
+  name: "",
+  email: "",
+  contact: "",
+  image: [],   // ✅ empty array rakh do taake consistent rahe
+});
+
 
   const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = getToken();
-        const res = await axios.get("http://localhost:7000/api/auth/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUser(res.data);
-      } catch (err) {
-        console.error("Failed to fetch profile", err);
-      }
-    };
+   const fetchProfile = async () => {
+  try {
+    const token = getToken();
+    const res = await axios.get("http://localhost:7000/api/auth/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setUser(res.data.user); // ✅ use res.data.user instead of res.data
+  } catch (err) {
+    console.error("Failed to fetch profile", err);
+  }
+};
+
 
     fetchProfile();
   }, []);
@@ -131,9 +134,9 @@ const Profile = () => {
   return (
     <div style={{ maxWidth: "500px", margin: "auto" }}>
       <h2>Profile</h2>
-      {user.image && (
+      {user.image?.[0]?.url && (
         <img
-          src={`http://localhost:7000/${user.image}`}
+        src={user.image[0].url}
           alt="Profile"
           style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "50%" }}
         />

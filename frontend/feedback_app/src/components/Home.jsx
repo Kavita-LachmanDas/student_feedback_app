@@ -1279,6 +1279,7 @@
 // }
 
 // export default Home
+
 import React, { useState, useEffect } from 'react'
 import { User, LogOut, MessageSquare, Send, Star, Camera, Edit, Trash2, Eye } from 'lucide-react'
 import { getToken } from '../utils/auth'
@@ -1314,12 +1315,38 @@ const Home = () => {
   const [feedback, setFeedback] = useState([]) // Fixed: consistent naming
   const [users, setUsers] = useState([]) // Added users state for admin
 
+  // Fetch user profile from server
+  const fetchUserProfile = async () => {
+    try {
+      const token = getToken()
+      if (!token) return
+
+      const response = await fetch('http://localhost:7000/api/auth/profile', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        setUser(result.user || result) // Update user state with fresh data
+        // Also update localStorage with fresh data
+        localStorage.setItem('user', JSON.stringify(result.user || result))
+      }
+    } catch (err) {
+      console.error("Failed to fetch user profile", err)
+    }
+  }
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser)
       setUser(parsedUser)
     }
+    
+    // Fetch fresh user data from server on component mount
+    fetchUserProfile()
   }, [])
 
   // Fetch feedback data
@@ -1475,29 +1502,50 @@ const Home = () => {
   }
 
   const handleUpdate = async () => {
-    const formData = new FormData()
-    formData.append('name', user.name)
-    formData.append('email', user.email)
-    formData.append('contact', user.contact)
-    if (imageFile) formData.append('image', imageFile)
-
     try {
-      const token = getToken()
+      const formData = new FormData();
+      formData.append('name', user.name);
+      formData.append('email', user.email);
+      formData.append('contact', user.contact);
+      if (imageFile) {
+        console.log("📷 Image selected:", imageFile.name);
+        formData.append('image', imageFile);
+      }
+
+      const token = getToken(); // Replace with actual token getter
+      console.log("🔐 Token:", token);
+      console.log("📤 Sending formData...");
+
       const response = await fetch('http://localhost:7000/api/auth/profile', {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // ✅ Only Authorization in headers, no Content-Type
         },
-        body: formData
-      })
-      const result = await response.json()
-      
-      alert(result.message)
-      setUser(result.user)
+        body: formData, // ✅ FormData allows file + text
+      });
+
+      const result = await response.json();
+      console.log("✅ Server response:", result);
+
+      if (response.ok) {
+        alert(result.message);
+        // Update user state with fresh data from server
+        setUser(result.user);
+        // IMPORTANT: Update localStorage with the fresh user data including new image
+        localStorage.setItem('user', JSON.stringify(result.user));
+        // Clear the image file input
+        setImageFile(null);
+        // Switch back to profile view
+        setActiveTab('profile');
+      } else {
+        alert(result.message || 'Profile update failed.');
+        console.error("❌ Error from server:", result);
+      }
     } catch (err) {
-      console.error('Error updating profile', err)
+      console.error('🔥 Error updating profile:', err);
+      alert("Something went wrong while updating profile.");
     }
-  }
+  };
 
   const handleDelete = async () => {
     const confirmDelete = window.confirm('Are you sure you want to delete your profile?')
@@ -1806,15 +1854,20 @@ const Home = () => {
         {/* Profile Image Section */}
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            {user.image ? (
+            {user.image && user.image.length > 0 && user.image[0]?.url ? (
               <img
-                src={`http://localhost:7000/${user.image}`}
+                src={user.image[0].url}
                 alt="Profile"
-                className="w-24 h-24 object-cover rounded-full border-4 border-gray-200"
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  objectFit: "cover",
+                  borderRadius: "50%",
+                }}
               />
             ) : (
               <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
-                <User size={32} className="text-gray-500" />
+                <User size={40} className="text-gray-400" />
               </div>
             )}
           </div>
@@ -1885,17 +1938,23 @@ const Home = () => {
         {/* Profile Image Section */}
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            {user.image ? (
+            {user.image && user.image.length > 0 && user.image[0]?.url ? (
               <img
-                src={`http://localhost:7000/${user.image}`}
+                src={user.image[0].url}
                 alt="Profile"
-                className="w-24 h-24 object-cover rounded-full border-4 border-gray-200"
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  objectFit: "cover",
+                  borderRadius: "50%",
+                }}
               />
             ) : (
               <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
-                <User size={32} className="text-gray-500" />
+                <User size={40} className="text-gray-400" />
               </div>
             )}
+
             <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-2 cursor-pointer hover:bg-blue-700 transition-colors">
               <Camera size={16} className="text-white" />
             </div>

@@ -20,9 +20,15 @@ const userSchema = mongoose.Schema({
   contact: {
     type: String,
   },
-  image: {
-    type: String,  // <-- CORRECT FIELD NAME
-  },
+  // image: {
+  //   type: String,  // <-- CORRECT FIELD NAME
+  // },
+    image: [
+    {
+      url: String,
+      public_id: String,
+    },
+  ],
   role: {
     type: String,
     enum: ["user", "admin"],
